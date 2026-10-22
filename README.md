@@ -9,9 +9,12 @@ Open `index.html` in any modern browser. There is no server, build step, install
 ## Features
 
 - Ten multiple-choice questions with short explanations
+- Easy, Medium, and Hard difficulty pools, with Medium selected by default
 - Progress bar and score counter
+- Two-minute quiz timer with an automatic results screen when time runs out
 - Animated green correct-answer and red incorrect-answer feedback
 - End screen with score-based emoji reaction
+- Results screen identifies the selected difficulty
 - System light/dark theme and reduced-motion support
 - Responsive, keyboard-accessible layout
 
