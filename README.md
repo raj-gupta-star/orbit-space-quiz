@@ -6,6 +6,8 @@ A colorful, responsive space exploration quiz with ten questions, instant answer
 
 Open `index.html` in any modern browser. There is no server, build step, installation, or external dependency.
 
+Play online: [Orbit — Space Quiz](https://raj-gupta-star.github.io/orbit-space-quiz/).
+
 ## Features
 
 - Ten multiple-choice questions with short explanations
@@ -22,3 +24,4 @@ Open `index.html` in any modern browser. There is no server, build step, install
 
 - `index.html` — the complete app, including all markup, styles, quiz content, and behavior
 - `AGENTS.md` — project-specific instructions for coding agents
+- `.github/workflows/deploy.yml` — publishes the standalone quiz to GitHub Pages on pushes to `main`
