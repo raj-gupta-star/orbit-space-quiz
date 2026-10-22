@@ -114,6 +114,13 @@
     .facts { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 26px; }
     .pill { padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface-raised); font-size: 13px; }
     .pill strong { color: var(--text); }
+    .difficulty-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin: 0 0 22px; padding: 0; border: 0; text-align: left; }
+    .difficulty-picker legend { margin-bottom: 9px; color: var(--muted); font-size: 13px; font-weight: 650; }
+    .difficulty-option { display: flex; min-height: 62px; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: var(--surface-raised); cursor: pointer; font-size: 13px; font-weight: 650; transition: border-color .18s ease, color .18s ease, background .18s ease; }
+    .difficulty-option:hover { border-color: var(--accent); }
+    .difficulty-option.selected { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 12%, var(--surface-raised)); }
+    .difficulty-option input { width: 16px; height: 16px; flex: 0 0 16px; margin: 0; accent-color: var(--accent-strong); }
+    .difficulty-option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
     button {
       font: inherit;
       cursor: pointer;
@@ -139,6 +146,9 @@
     .primary:active { transform: translateY(0); }
     .quiz-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 17px; }
     .counter { color: var(--muted); font-size: 13px; font-weight: 650; }
+    .timer { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid var(--line); border-radius: 99px; color: var(--text); background: var(--surface-raised); font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 700; transition: color .2s ease, border-color .2s ease; }
+    .timer-icon { color: var(--accent); }
+    .timer.urgent { border-color: var(--red); color: var(--red); animation: pulse 1s ease-in-out infinite; }
     .score { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface-raised); font-size: 13px; font-weight: 700; }
     .score-star { color: #f6c85f; }
     .progress-track { height: 7px; overflow: hidden; margin-bottom: 29px; border-radius: 99px; background: var(--surface-raised); }
@@ -189,6 +199,8 @@
     .next-button.visible { display: inline-flex; }
     .result-score { margin: 11px 0 6px; font-size: 55px; font-weight: 800; line-height: 1.1; letter-spacing: -.06em; }
     .result-label { color: var(--muted); }
+    .result-difficulty { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+    .result-difficulty strong { color: var(--accent); }
     .result-message { margin: 13px auto 23px; color: var(--muted); }
     .result-stats { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
     .result-stat { min-width: 105px; padding: 12px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-raised); }
@@ -200,12 +212,16 @@
     @keyframes float { 50% { transform: translateY(-8px) rotate(3deg); } }
     @keyframes drift { to { transform: translate(18px, -15px); opacity: .9; } }
     @keyframes pop { 50% { transform: scale(1.025); } }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent); } }
     @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
     @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 420px) {
       body { padding: 22px 14px; }
       .card { border-radius: 20px; }
       .hero-emoji { font-size: 50px; }
+      .difficulty-picker { gap: 6px; }
+      .difficulty-option { gap: 5px; padding: 8px 6px; font-size: 12px; }
+      .difficulty-option input { width: 14px; height: 14px; flex-basis: 14px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -229,12 +245,31 @@
         <span class="pill">⏱ <strong>About 2 min</strong></span>
         <span class="pill">✨ <strong>No pressure</strong></span>
       </div>
+      <fieldset class="difficulty-picker">
+        <legend>Choose your difficulty</legend>
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="easy">
+          <span>🌱 Easy</span>
+        </label>
+        <label class="difficulty-option selected">
+          <input type="radio" name="difficulty" value="medium" checked>
+          <span>🪐 Medium</span>
+        </label>
+        <label class="difficulty-option">
+          <input type="radio" name="difficulty" value="hard">
+          <span>🚀 Hard</span>
+        </label>
+      </fieldset>
       <button class="primary" id="start-button">Start exploring <span aria-hidden="true">→</span></button>
     </section>
 
     <section class="card" id="quiz" aria-labelledby="question" hidden>
       <div class="quiz-head">
         <span class="counter" id="counter">Question 1 of 10</span>
+        <span class="timer" id="timer" aria-label="Time remaining">
+          <span class="timer-icon" aria-hidden="true">◷</span>
+          <span id="timer-value" aria-live="off">2:00</span>
+        </span>
         <span class="score" aria-live="polite"><span class="score-star" aria-hidden="true">★</span> <span id="score">0</span> pts</span>
       </div>
       <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
@@ -257,6 +292,7 @@
       <div class="eyebrow">Mission complete</div>
       <h1 id="result-title">Look at you, <span class="gradient-text">space explorer.</span></h1>
       <div class="result-score"><span id="final-score">0</span><span class="result-label">/ 10</span></div>
+      <p class="result-difficulty">Difficulty: <strong id="result-difficulty">Medium</strong></p>
       <p class="result-message" id="result-message"></p>
       <div class="result-stats">
         <div class="result-stat"><strong id="correct-count">0</strong><span>correct answers</span></div>
@@ -271,7 +307,70 @@
   <script>
     "use strict";
 
-    const questions = [
+    const questionSets = {
+      easy: [
+        {
+          question: "Which planet do we live on?",
+          answers: ["Mars", "Earth", "Venus", "Jupiter"],
+          correct: 1,
+          explanation: "Earth is our home planet, the third planet from the Sun."
+        },
+        {
+          question: "Which bright object gives Earth light during the day?",
+          answers: ["The Moon", "Venus", "The Sun", "Sirius"],
+          correct: 2,
+          explanation: "The Sun is our nearest star and the main source of daylight."
+        },
+        {
+          question: "What is Earth's natural satellite called?",
+          answers: ["Europa", "The Moon", "Titan", "Phobos"],
+          correct: 1,
+          explanation: "The Moon orbits Earth about once every 27 days."
+        },
+        {
+          question: "Which planet is famous for its beautiful rings?",
+          answers: ["Saturn", "Mercury", "Earth", "Mars"],
+          correct: 0,
+          explanation: "Saturn's rings are made of countless pieces of ice and rock."
+        },
+        {
+          question: "What do astronauts ride to travel into space?",
+          answers: ["Submarine", "Rocket", "Sailboat", "Train"],
+          correct: 1,
+          explanation: "Powerful rockets lift spacecraft above Earth's atmosphere."
+        },
+        {
+          question: "Which planet is the biggest in our solar system?",
+          answers: ["Earth", "Mars", "Jupiter", "Venus"],
+          correct: 2,
+          explanation: "Jupiter is the largest planet, with more than twice the mass of all the other planets combined."
+        },
+        {
+          question: "What shape is the Sun?",
+          answers: ["A cube", "A sphere", "A flat disk", "A pyramid"],
+          correct: 1,
+          explanation: "Like most stars, the Sun is an enormous ball of hot gas shaped roughly like a sphere."
+        },
+        {
+          question: "Which planet is called the Red Planet?",
+          answers: ["Mars", "Neptune", "Saturn", "Uranus"],
+          correct: 0,
+          explanation: "Dust containing iron gives Mars its reddish appearance."
+        },
+        {
+          question: "What can you see twinkling in the night sky?",
+          answers: ["Stars", "Clouds of sand", "Underwater lights", "Street lamps on the Moon"],
+          correct: 0,
+          explanation: "Stars are distant suns, and their light can appear to twinkle as it passes through Earth's atmosphere."
+        },
+        {
+          question: "Is the Moon a planet or a moon?",
+          answers: ["A planet", "A moon", "A star", "A comet"],
+          correct: 1,
+          explanation: "The Moon is Earth's natural satellite, so it is a moon—not a planet or a star."
+        }
+      ],
+      medium: [
       {
         question: "Which planet is known as the Red Planet?",
         answers: ["Venus", "Mars", "Jupiter", "Mercury"],
@@ -332,7 +431,70 @@
         correct: 2,
         explanation: "A light-year is the distance light travels in one year—nearly 9.5 trillion kilometers."
       }
-    ];
+      ],
+      hard: [
+        {
+          question: "Which moon has the thickest atmosphere of any moon in our solar system?",
+          answers: ["Europa", "Titan", "Triton", "Ganymede"],
+          correct: 1,
+          explanation: "Saturn's moon Titan has a dense atmosphere, composed mostly of nitrogen."
+        },
+        {
+          question: "What is the boundary around a black hole beyond which nothing can escape called?",
+          answers: ["Accretion ring", "Event horizon", "Photon belt", "Singularity shell"],
+          correct: 1,
+          explanation: "The event horizon marks the point where the escape velocity exceeds the speed of light."
+        },
+        {
+          question: "Which spacecraft was the first to cross into interstellar space?",
+          answers: ["Pioneer 10", "Voyager 1", "New Horizons", "Voyager 2"],
+          correct: 1,
+          explanation: "Voyager 1 crossed the heliopause into interstellar space in 2012."
+        },
+        {
+          question: "What is the name of the largest volcano in the solar system?",
+          answers: ["Mauna Kea", "Olympus Mons", "Elysium Mons", "Maxwell Montes"],
+          correct: 1,
+          explanation: "Olympus Mons on Mars rises about 22 kilometers above the surrounding plains."
+        },
+        {
+          question: "Which point in an orbit is closest to the Sun?",
+          answers: ["Aphelion", "Perihelion", "Perigee", "Apoapsis"],
+          correct: 1,
+          explanation: "Perihelion is the point in an orbit where an object is closest to the Sun."
+        },
+        {
+          question: "Which planet has the shortest day, completing one rotation in about 10 hours?",
+          answers: ["Earth", "Jupiter", "Neptune", "Mercury"],
+          correct: 1,
+          explanation: "Jupiter rotates once in roughly 9 hours and 56 minutes."
+        },
+        {
+          question: "What is the name of the region beyond Neptune containing many icy bodies?",
+          answers: ["Asteroid belt", "Kuiper belt", "Van Allen belt", "Trojan belt"],
+          correct: 1,
+          explanation: "The Kuiper belt is a distant region beyond Neptune that includes dwarf planets such as Pluto."
+        },
+        {
+          question: "Which element makes up most of the Sun by mass?",
+          answers: ["Oxygen", "Carbon", "Hydrogen", "Iron"],
+          correct: 2,
+          explanation: "The Sun is about three-quarters hydrogen by mass, which it fuses into helium."
+        },
+        {
+          question: "What is the name of the boundary where the solar wind slows abruptly before the heliopause?",
+          answers: ["Bow shock", "Termination shock", "Magnetopause", "Roche limit"],
+          correct: 1,
+          explanation: "At the termination shock, the solar wind slows from supersonic to subsonic speeds."
+        },
+        {
+          question: "Which exoplanet detection method measures a star's wobble through shifts in its spectrum?",
+          answers: ["Transit method", "Direct imaging", "Radial velocity", "Gravitational lensing"],
+          correct: 2,
+          explanation: "The radial-velocity method detects the small Doppler shifts caused by a planet tugging on its star."
+        }
+      ]
+    };
 
     const intro = document.getElementById("intro");
     const quiz = document.getElementById("quiz");
@@ -342,11 +504,19 @@
     const feedback = document.getElementById("feedback");
     const nextButton = document.getElementById("next-button");
     const progress = document.querySelector('[role="progressbar"]');
+    const quizDurationSeconds = 120;
+    let activeQuestions = questionSets.medium;
+    let activeDifficulty = "medium";
     let currentQuestion = 0;
     let score = 0;
     let answered = false;
+    let timerInterval;
+    let deadline;
 
     function startQuiz() {
+      clearInterval(timerInterval);
+      activeDifficulty = document.querySelector('input[name="difficulty"]:checked').value;
+      activeQuestions = questionSets[activeDifficulty];
       currentQuestion = 0;
       score = 0;
       document.getElementById("score").textContent = "0";
@@ -354,14 +524,26 @@
       results.hidden = true;
       quiz.hidden = false;
       renderQuestion();
+      deadline = Date.now() + quizDurationSeconds * 1000;
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 250);
+    }
+
+    function updateTimer() {
+      const secondsRemaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      const minutes = Math.floor(secondsRemaining / 60);
+      const seconds = String(secondsRemaining % 60).padStart(2, "0");
+      document.getElementById("timer-value").textContent = `${minutes}:${seconds}`;
+      document.getElementById("timer").classList.toggle("urgent", secondsRemaining <= 10);
+      if (secondsRemaining === 0) showResults(true);
     }
 
     function renderQuestion() {
-      const item = questions[currentQuestion];
+      const item = activeQuestions[currentQuestion];
       answered = false;
-      document.getElementById("counter").textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      document.getElementById("counter").textContent = `Question ${currentQuestion + 1} of ${activeQuestions.length}`;
       progress.setAttribute("aria-valuenow", String(currentQuestion));
-      document.getElementById("progress-fill").style.width = `${(currentQuestion / questions.length) * 100}%`;
+      document.getElementById("progress-fill").style.width = `${(currentQuestion / activeQuestions.length) * 100}%`;
       questionTitle.textContent = item.question;
       answersElement.replaceChildren();
       feedback.classList.remove("visible");
@@ -382,7 +564,7 @@
     function chooseAnswer(selected) {
       if (answered) return;
       answered = true;
-      const item = questions[currentQuestion];
+      const item = activeQuestions[currentQuestion];
       const isCorrect = selected === item.correct;
       const buttons = [...answersElement.children];
       buttons.forEach((button, index) => {
@@ -399,21 +581,25 @@
       document.getElementById("feedback-title").textContent = isCorrect ? "Brilliant! That's right." : `Not quite — it's ${item.answers[item.correct]}.`;
       document.getElementById("feedback-copy").textContent = item.explanation;
       feedback.classList.add("visible");
-      nextButton.innerHTML = currentQuestion === questions.length - 1
+      nextButton.innerHTML = currentQuestion === activeQuestions.length - 1
         ? 'See my results <span aria-hidden="true">→</span>'
         : 'Next question <span aria-hidden="true">→</span>';
       nextButton.classList.add("visible");
       progress.setAttribute("aria-valuenow", String(currentQuestion + 1));
-      document.getElementById("progress-fill").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+      document.getElementById("progress-fill").style.width = `${((currentQuestion + 1) / activeQuestions.length) * 100}%`;
     }
 
-    function showResults() {
+    function showResults(timeExpired = false) {
+      clearInterval(timerInterval);
       quiz.hidden = true;
       results.hidden = false;
       document.getElementById("final-score").textContent = String(score);
       document.getElementById("correct-count").textContent = String(score);
+      document.getElementById("result-difficulty").textContent = activeDifficulty.charAt(0).toUpperCase() + activeDifficulty.slice(1);
       const emoji = score === 10 ? "🏆" : score >= 7 ? "🚀" : score >= 4 ? "🌟" : "🧑‍🚀";
-      const message = score === 10
+      const message = timeExpired
+        ? `Time's up! You answered ${currentQuestion + (answered ? 1 : 0)} of ${activeQuestions.length} questions and scored ${score}.`
+        : score === 10
         ? "A perfect flight! You're officially a cosmic genius."
         : score >= 7
           ? "Stellar work! You know your way around the universe."
@@ -429,12 +615,20 @@
     document.getElementById("restart-button").addEventListener("click", startQuiz);
     nextButton.addEventListener("click", () => {
       if (!answered) return;
-      if (currentQuestion === questions.length - 1) {
+      if (currentQuestion === activeQuestions.length - 1) {
         showResults();
       } else {
         currentQuestion += 1;
         renderQuestion();
       }
+    });
+
+    document.querySelectorAll('input[name="difficulty"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        document.querySelectorAll(".difficulty-option").forEach((option) => {
+          option.classList.toggle("selected", option.querySelector("input").checked);
+        });
+      });
     });
   </script>
 </body>
